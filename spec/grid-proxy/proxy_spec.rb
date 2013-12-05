@@ -3,9 +3,9 @@ require 'spec_helper'
 describe GP::Proxy do
   include CrtHelpers
 
-  subject { GP::Proxy.new(proxy_payload) }
+  subject { GP::Proxy.new proxy_payload }
 
-  let(:simple_ca) { load_cert('simple_ca.crt') }
+  let(:simple_ca) { load_cert 'simple_ca.crt' }
 
   it 'loads proxy' do
     expect(subject.proxycert).to be_an_instance_of OpenSSL::X509::Certificate
@@ -23,7 +23,7 @@ describe GP::Proxy do
 
       context 'and user cert is signed by ca' do
         it 'does not throw any exception - proxy is verify' do
-          subject.verify!(simple_ca)
+          subject.verify! simple_ca
         end
       end
 
@@ -32,34 +32,48 @@ describe GP::Proxy do
 
         it 'throws usercert not signed with trusted certificate' do
           expect {
-            subject.verify!(polish_grid_ca)
+            subject.verify! polish_grid_ca
           }.to raise_error(GP::ProxyValidationError, 'Usercert not signed with trusted certificate')
         end
       end
 
       context 'and proxy is signed by other user cert' do
-        subject { GP::Proxy.new(load_cert 'proxy_and_differnt_user_cert.crt') }
+        subject { GP::Proxy.new(load_cert 'proxy_and_differnt_user_cert') }
 
         it 'throws proxy not signed with user certificate' do
           expect {
-            subject.verify!(simple_ca)
+            subject.verify! simple_ca
           }.to raise_error(GP::ProxyValidationError, 'Proxy not signed with user certificate')
         end
       end
 
       context 'and proxy subject does not begin with the issuer' do
-        #  raise "Proxy error: Proxy subject must begin with the issuer." if proxycert.subject.to_s.index(proxycert.issuer.to_s) != 0
+        subject { GP::Proxy.new load_cert('wrong_subject') }
+
+        it 'throws proxy subject must begin with the issuer' do
+          expect {
+            subject.verify! simple_ca
+          }.to raise_error(GP::ProxyValidationError, 'Proxy subject must begin with the issuer')
+        end
       end
 
       context 'and proxy is not actual proxy ("/CN=" not in subject difference")' do
+        subject { GP::Proxy.new load_cert('no_proxy') }
         #  raise "Proxy error: Couldn't find '/CN=' in DN, not a proxy." if !proxycert.subject.to_s.include?('/CN=')
+        it "throws couldn't find '/CN=' in DN, not a proxy" do
+          expect_validation_error("Couldn't find '/CN=' in DN, not a proxy")
+        end
       end
 
       context 'and proxy is signed by other user cert' do
-        #  raise "Proxy error: Proxy and user cert missmatch." if proxycert.issuer.to_s != usercert.subject.to_s
-      end
+        subject { GP::Proxy.new load_cert('wrong_issuer') }
 
-      #  raise "Proxy error: Shortened DN not permited." if proxycert.issuer.to_s.length > proxycert.subject.to_s.length
+        it 'throws proxy and user cert mismatch' do
+          expect {
+            subject.verify! simple_ca
+          }.to raise_error(GP::ProxyValidationError, 'Proxy and user cert mismatch')
+        end
+      end
     end
 
     context 'when it is to early' do
