@@ -31,9 +31,7 @@ describe GP::Proxy do
         let(:polish_grid_ca) { load_cert('other_ca.crt') }
 
         it 'throws usercert not signed with trusted certificate' do
-          expect {
-            subject.verify! polish_grid_ca
-          }.to raise_error(GP::ProxyValidationError, 'Usercert not signed with trusted certificate')
+          expect_validation_error('Usercert not signed with trusted certificate')
         end
       end
 
@@ -41,9 +39,7 @@ describe GP::Proxy do
         subject { GP::Proxy.new(load_cert 'proxy_and_differnt_user_cert') }
 
         it 'throws proxy not signed with user certificate' do
-          expect {
-            subject.verify! simple_ca
-          }.to raise_error(GP::ProxyValidationError, 'Proxy not signed with user certificate')
+          expect_validation_error('Proxy not signed with user certificate')
         end
       end
 
@@ -51,15 +47,12 @@ describe GP::Proxy do
         subject { GP::Proxy.new load_cert('wrong_subject') }
 
         it 'throws proxy subject must begin with the issuer' do
-          expect {
-            subject.verify! simple_ca
-          }.to raise_error(GP::ProxyValidationError, 'Proxy subject must begin with the issuer')
+          expect_validation_error('Proxy subject must begin with the issuer')
         end
       end
 
       context 'and proxy is not actual proxy ("/CN=" not in subject difference")' do
         subject { GP::Proxy.new load_cert('no_proxy') }
-        #  raise "Proxy error: Couldn't find '/CN=' in DN, not a proxy." if !proxycert.subject.to_s.include?('/CN=')
         it "throws couldn't find '/CN=' in DN, not a proxy" do
           expect_validation_error("Couldn't find '/CN=' in DN, not a proxy")
         end
@@ -69,9 +62,7 @@ describe GP::Proxy do
         subject { GP::Proxy.new load_cert('wrong_issuer') }
 
         it 'throws proxy and user cert mismatch' do
-          expect {
-            subject.verify! simple_ca
-          }.to raise_error(GP::ProxyValidationError, 'Proxy and user cert mismatch')
+          expect_validation_error('Proxy and user cert mismatch')
         end
       end
     end
@@ -82,9 +73,7 @@ describe GP::Proxy do
       end
 
       it 'throws proxy is not valid yet' do
-        expect {
-          subject.verify!(simple_ca)
-        }.to raise_error(GP::ProxyValidationError, 'Proxy is not valid yet')
+        expect_validation_error('Proxy is not valid yet')
       end
     end
 
@@ -94,9 +83,7 @@ describe GP::Proxy do
       end
 
       it 'throws proxy expired' do
-        expect {
-          subject.verify!(simple_ca)
-        }.to raise_error(GP::ProxyValidationError, 'Proxy expired')
+        expect_validation_error('Proxy expired')
       end
     end
   end
