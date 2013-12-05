@@ -2,8 +2,9 @@ module GP
   class Proxy
     CERT_START = '-----BEGIN CERTIFICATE-----'
 
-    def initialize(proxy_payload)
+    def initialize(proxy_payload, username_prefix = 'plg')
       @proxy_payload = proxy_payload
+      @username_prefix = username_prefix
     end
 
     def proxycert
@@ -27,6 +28,14 @@ module GP
       raise GP::ProxyValidationError.new('Proxy and user cert mismatch') unless proxycert_issuer == usercert.subject.to_s
       raise GP::ProxyValidationError.new("Proxy subject must begin with the issuer") unless proxycert_subject.to_s.index(proxycert_issuer) == 0
       raise GP::ProxyValidationError.new("Couldn't find '/CN=' in DN, not a proxy") unless proxycert_subject.to_s[proxycert_issuer.size, proxycert_subject.to_s.size].to_s.include?('/CN=')
+    end
+
+    def username
+      username_entry = proxycert.subject.to_a.select do |el|
+        el[0] == 'CN' && el[1].start_with?(@username_prefix)
+      end
+
+      username_entry.size == 1 ? username_entry[0][1] : nil
     end
 
     private

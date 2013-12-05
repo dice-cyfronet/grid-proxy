@@ -100,4 +100,10 @@ describe GP::Proxy do
       end
     end
   end
+
+  describe '#username' do
+    it 'returns username from proxy subject' do
+      expect(subject.username).to eq 'plgkasztelnik'
+    end
+  end
 end
