@@ -88,6 +88,24 @@ describe GP::Proxy do
     end
   end
 
+  describe '#valid?' do
+    context 'when proxy is valid' do
+      before do
+        Time.stub(:now).and_return(Time.new(2013, 12, 4, 12, 0, 0, "+01:00"))
+      end
+
+      it 'returns true' do
+        expect(subject.valid? simple_ca).to eq true
+      end
+    end
+
+    context 'when proxy is not valid' do
+      it 'returns false' do
+        expect(subject.valid? simple_ca).to eq false
+      end
+    end
+  end
+
   describe '#username' do
     it 'returns username from proxy subject' do
       expect(subject.username).to eq 'plgkasztelnik'

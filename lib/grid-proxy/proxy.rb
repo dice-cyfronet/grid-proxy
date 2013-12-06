@@ -30,6 +30,15 @@ module GP
       raise GP::ProxyValidationError.new("Couldn't find '/CN=' in DN, not a proxy") unless proxycert_subject.to_s[proxycert_issuer.size, proxycert_subject.to_s.size].to_s.include?('/CN=')
     end
 
+    def valid?(ca_cert_payload)
+      begin
+        verify! ca_cert_payload
+        true
+      rescue GP::ProxyValidationError => e
+        false
+      end
+    end
+
     def username
       username_entry = proxycert.subject.to_a.select do |el|
         el[0] == 'CN' && el[1].start_with?(@username_prefix)
