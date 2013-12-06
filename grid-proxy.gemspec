@@ -8,8 +8,8 @@ Gem::Specification.new do |spec|
   spec.version       = GP::VERSION
   spec.authors       = ["Marek Kasztelnik"]
   spec.email         = ["mkasztelnik@gmail.com"]
-  spec.description   = %q{TODO: Write a gem description}
-  spec.summary       = %q{TODO: Write a gem summary}
+  spec.description   = %q{Grid proxy utils}
+  spec.summary       = %q{Grid proxy utils}
   spec.homepage      = ""
   spec.license       = "MIT"
 
