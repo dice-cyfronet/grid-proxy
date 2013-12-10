@@ -2,6 +2,8 @@ module GP
   class Proxy
     CERT_START = '-----BEGIN CERTIFICATE-----'
 
+    attr_reader :proxy_payload
+
     def initialize(proxy_payload, username_prefix = 'plg')
       @proxy_payload = proxy_payload
       @username_prefix = username_prefix

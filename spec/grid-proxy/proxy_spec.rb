@@ -111,4 +111,10 @@ describe GP::Proxy do
       expect(subject.username).to eq 'plgkasztelnik'
     end
   end
+
+  describe '#proxy_payload' do
+    it 'returns proxy payload' do
+      expect(subject.proxy_payload).to eq proxy_payload
+    end
+  end
 end
