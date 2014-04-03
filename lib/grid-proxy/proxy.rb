@@ -13,6 +13,14 @@ module GP
       @proxycert ||= cert_for_element(1)
     end
 
+    def proxykey
+      begin
+        @proxykey ||= OpenSSL::PKey.read(proxy_element(1))
+      rescue
+        nil
+      end
+    end
+
     def usercert
       @usercert ||= cert_for_element(2)
     end
@@ -30,6 +38,9 @@ module GP
       raise GP::ProxyValidationError.new('Proxy and user cert mismatch') unless proxycert_issuer == usercert.subject.to_s
       raise GP::ProxyValidationError.new("Proxy subject must begin with the issuer") unless proxycert_subject.to_s.index(proxycert_issuer) == 0
       raise GP::ProxyValidationError.new("Couldn't find '/CN=' in DN, not a proxy") unless proxycert_subject.to_s[proxycert_issuer.size, proxycert_subject.to_s.size].to_s.include?('/CN=')
+
+      raise GP::ProxyValidationError.new("Private proxy key missing") unless proxykey
+      raise GP::ProxyValidationError.new("Private proxy key and cert mismatch") unless proxycert.check_private_key(proxykey)
     end
 
     def valid?(ca_cert_payload)
@@ -52,7 +63,11 @@ module GP
     private
 
     def cert_for_element(element_nr)
-      cert "#{CERT_START}#{@proxy_payload.split(CERT_START)[element_nr]}"
+      cert(proxy_element(element_nr))
+    end
+
+    def proxy_element(element_nr)
+      "#{CERT_START}#{@proxy_payload.split(CERT_START)[element_nr]}"
     end
 
     def cert(payload)

@@ -86,6 +86,27 @@ describe GP::Proxy do
         expect_validation_error('Proxy expired', simple_ca)
       end
     end
+
+    context 'with invalid proxy key' do
+      before do
+        Time.stub(:now).and_return(Time.new(2013, 12, 4, 12, 0, 0, "+01:00"))
+      end
+
+      context 'when private key does not exist' do
+        subject { GP::Proxy.new(load_cert('without_private_key')) }
+
+        it 'throws missing proxy private key' do
+          expect_validation_error('Private proxy key missing', simple_ca)
+        end
+      end
+
+      context 'when cert and private key does not match' do
+        subject { GP::Proxy.new(load_cert('cert_and_key_mismatch')) }
+        it 'throws private key and cert mismatch' do
+          expect_validation_error('Private proxy key and cert mismatch', simple_ca)
+        end
+      end
+    end
   end
 
   describe '#valid?' do
