@@ -42,11 +42,11 @@ module GP
     end
 
     def username
-      username_entry = proxycert.subject.to_a.select do |el|
+      username_entry = usercert.subject.to_a.detect do |el|
         el[0] == 'CN' && el[1].start_with?(@username_prefix)
       end
 
-      username_entry.size == 1 ? username_entry[0][1] : nil
+      username_entry ? username_entry[1] : nil
     end
 
     private
