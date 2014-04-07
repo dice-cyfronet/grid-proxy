@@ -53,7 +53,7 @@ module GP
     end
 
     def revoked?(crl_payload)
-      false
+      crl(crl_payload).verify(proxycert.public_key)
     end
 
     def username
@@ -76,6 +76,10 @@ module GP
 
     def cert(payload)
       OpenSSL::X509::Certificate.new payload
+    end
+
+    def crl(payload)
+      OpenSSL::X509::CRL.new payload
     end
   end
 end
