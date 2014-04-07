@@ -5,10 +5,21 @@ describe GP::Proxy do
 
   subject { GP::Proxy.new proxy_payload }
 
+
+  let(:my_proxy) { GP::Proxy.new load_cert 'proxy.pem' }
   let(:simple_ca) { load_cert 'simple_ca.crt' }
+  let(:crl) { load_cert '8a661490.r0' }
 
   it 'loads proxy' do
     expect(subject.proxycert).to be_an_instance_of OpenSSL::X509::Certificate
+  end
+
+  it 'loads my proxy' do
+    expect(my_proxy.proxycert).to be_an_instance_of OpenSSL::X509::Certificate
+  end
+
+  it 'verifies revokation of my proxy' do
+    expect(my_proxy.revoked? crl).to be_false
   end
 
   it 'loads user cert' do

@@ -52,6 +52,10 @@ module GP
       end
     end
 
+    def revoked?(crl_payload)
+      false
+    end
+
     def username
       username_entry = usercert.subject.to_a.detect do |el|
         el[0] == 'CN' && el[1].start_with?(@username_prefix)
