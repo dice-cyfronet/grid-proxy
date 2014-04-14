@@ -53,7 +53,19 @@ module GP
     end
 
     def revoked?(crl_payload)
-      crl(crl_payload).verify(proxycert.public_key)
+      # crl should to be verified with ca pk
+      # crl(crl_payload).verify()
+
+      cert_revoked = crl(crl_payload).revoked().detect do |revoked|
+        revoked.serial == usercert.serial
+      end
+
+      if cert_revoked == nil
+        return false
+      else
+        return true
+      end
+
     end
 
     def username

@@ -7,8 +7,9 @@ describe GP::Proxy do
 
 
   let(:my_proxy) { GP::Proxy.new load_cert 'proxy.pem' }
+  let(:my_revoked_proxy) { GP::Proxy.new load_cert 'proxy_revoked.pem' }
   let(:simple_ca) { load_cert 'simple_ca.crt' }
-  let(:crl) { load_cert '8a661490.r0' }
+  let(:crl) { load_cert 'crl.der' }
 
   it 'loads proxy' do
     expect(subject.proxycert).to be_an_instance_of OpenSSL::X509::Certificate
@@ -20,6 +21,10 @@ describe GP::Proxy do
 
   it 'verifies revokation of my proxy' do
     expect(my_proxy.revoked? crl).to be_false
+  end
+
+  it 'verifies revokation of my revoked proxy' do
+    expect(my_revoked_proxy.revoked? crl).to be_true
   end
 
   it 'loads user cert' do
