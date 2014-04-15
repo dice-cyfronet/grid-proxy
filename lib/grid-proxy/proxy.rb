@@ -53,18 +53,15 @@ module GP
     end
 
     def revoked?(crl_payload)
-      # crl should to be verified with ca pk
+      # crl should to be verified with ca cert
       # crl(crl_payload).verify()
 
-      cert_revoked = crl(crl_payload).revoked().detect do |revoked|
+      #check for usercert serial in list of all revoked certs
+      revoked_cert = crl(crl_payload).revoked().detect do |revoked|
         revoked.serial == usercert.serial
       end
 
-      if cert_revoked == nil
-        return false
-      else
-        return true
-      end
+      return revoked_cert != nil ? true : false
 
     end
 
