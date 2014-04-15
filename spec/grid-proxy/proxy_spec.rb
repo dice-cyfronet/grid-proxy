@@ -5,26 +5,10 @@ describe GP::Proxy do
 
   subject { GP::Proxy.new proxy_payload }
 
-
-  let(:my_proxy) { GP::Proxy.new load_cert 'proxy.pem' }
-  let(:my_revoked_proxy) { GP::Proxy.new load_cert 'proxy_revoked.pem' }
   let(:simple_ca) { load_cert 'simple_ca.crt' }
-  let(:crl) { load_cert 'crl.der' }
 
   it 'loads proxy' do
     expect(subject.proxycert).to be_an_instance_of OpenSSL::X509::Certificate
-  end
-
-  it 'loads my proxy' do
-    expect(my_proxy.proxycert).to be_an_instance_of OpenSSL::X509::Certificate
-  end
-
-  it 'verifies revokation of my proxy' do
-    expect(my_proxy.revoked? crl).to be_false
-  end
-
-  it 'verifies revokation of my revoked proxy' do
-    expect(my_revoked_proxy.revoked? crl).to be_true
   end
 
   it 'loads user cert' do
@@ -152,6 +136,25 @@ describe GP::Proxy do
   describe '#proxy_payload' do
     it 'returns proxy payload' do
       expect(subject.proxy_payload).to eq proxy_payload
+    end
+  end
+
+  describe '#revoked?' do
+
+    let(:not_revoked_proxy) { GP::Proxy.new load_cert 'proxy_notrevoked.pem' }
+    let(:revoked_proxy) { GP::Proxy.new load_cert 'proxy_revoked.pem' }
+    let(:simple_ca_crl) { load_cert 'simple_ca.crl' }
+
+    context 'when proxy is not revoked' do
+      it 'returns false' do
+        expect(not_revoked_proxy.revoked? simple_ca_crl).to be_false
+      end
+    end
+
+    context 'when proxy is revoked' do
+      it 'returns true' do
+        expect(revoked_proxy.revoked? simple_ca_crl).to be_true
+      end
     end
   end
 end
