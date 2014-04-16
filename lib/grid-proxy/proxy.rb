@@ -25,7 +25,7 @@ module GP
       @usercert ||= cert_for_element(2)
     end
 
-    def verify!(ca_cert_payload)
+    def verify!(ca_cert_payload, crl_payload = nil)
       now = Time.now
       raise GP::ProxyValidationError.new('Proxy is not valid yet') if now < proxycert.not_before
       raise GP::ProxyValidationError.new('Proxy expired') if now > proxycert.not_after
@@ -41,11 +41,13 @@ module GP
 
       raise GP::ProxyValidationError.new("Private proxy key missing") unless proxykey
       raise GP::ProxyValidationError.new("Private proxy key and cert mismatch") unless proxycert.check_private_key(proxykey)
+
+      raise GP::ProxyValidationError.new("User cert was revoked") if crl_payload != nil and revoked? crl_payload
     end
 
-    def valid?(ca_cert_payload)
+    def valid?(ca_cert_payload, crl_payload = nil)
       begin
-        verify! ca_cert_payload
+        verify! ca_cert_payload, crl_payload
         true
       rescue GP::ProxyValidationError => e
         false

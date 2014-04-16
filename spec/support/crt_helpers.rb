@@ -7,9 +7,9 @@ module CrtHelpers
     File.read File.join(File.dirname(__FILE__), '..', 'certs', cert_name)
   end
 
-  def expect_validation_error(error_msg, ca)
+  def expect_validation_error(error_msg, ca, crl = nil)
     expect {
-      subject.verify! ca
+      subject.verify! ca, crl
     }.to raise_error(GP::ProxyValidationError, error_msg)
   end
 end

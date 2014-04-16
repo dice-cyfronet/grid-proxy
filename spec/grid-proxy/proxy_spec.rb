@@ -6,6 +6,8 @@ describe GP::Proxy do
   subject { GP::Proxy.new proxy_payload }
 
   let(:simple_ca) { load_cert 'simple_ca.crt' }
+  let(:simple_ca_crl) { load_cert 'simple_ca.crl' }
+
 
   it 'loads proxy' do
     expect(subject.proxycert).to be_an_instance_of OpenSSL::X509::Certificate
@@ -107,6 +109,28 @@ describe GP::Proxy do
         end
       end
     end
+
+    context 'check for revokation of cert' do
+      before do
+        Time.stub(:now).and_return(Time.new(2014, 4, 14, 20, 0, 0, "+01:00"))
+      end
+
+      context 'usercert was revoked' do
+        subject { GP::Proxy.new load_cert('proxy_revoked.pem') }
+
+        it 'throws proper exception' do
+          expect_validation_error("User cert was revoked", simple_ca, simple_ca_crl)
+        end
+      end
+
+      context 'usercert was not revoked' do
+        subject { GP::Proxy.new load_cert('proxy_notrevoked.pem') }
+
+        it 'does not throw exception' do
+          subject.verify! simple_ca, simple_ca_crl
+        end
+      end
+    end
   end
 
   describe '#valid?' do
@@ -141,19 +165,17 @@ describe GP::Proxy do
 
   describe '#revoked?' do
 
-    let(:not_revoked_proxy) { GP::Proxy.new load_cert 'proxy_notrevoked.pem' }
-    let(:revoked_proxy) { GP::Proxy.new load_cert 'proxy_revoked.pem' }
-    let(:simple_ca_crl) { load_cert 'simple_ca.crl' }
-
     context 'when proxy is not revoked' do
+      subject { GP::Proxy.new(load_cert('proxy_notrevoked.pem')) }
       it 'returns false' do
-        expect(not_revoked_proxy.revoked? simple_ca_crl).to be_false
+        expect(subject.revoked? simple_ca_crl).to be_false
       end
     end
 
     context 'when proxy is revoked' do
+      subject { GP::Proxy.new(load_cert('proxy_revoked.pem')) }
       it 'returns true' do
-        expect(revoked_proxy.revoked? simple_ca_crl).to be_true
+        expect(subject.revoked? simple_ca_crl).to be_true
       end
     end
   end
