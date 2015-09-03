@@ -131,6 +131,18 @@ describe GP::Proxy do
         end
       end
     end
+
+    context 'when user cert is outdated' do
+      subject { GP::Proxy.new load_cert('proxy_signed_by_outdated_cert.pem') }
+      before do
+        Time.stub(:now).and_return(Time.new(2015, 9, 1, 20, 0, 0, "+01:00"))
+      end
+
+      it 'throws exception' do
+        expect_validation_error('Proxy signed by outdated certificate',
+                                simple_ca)
+      end
+    end
   end
 
   describe '#valid?' do

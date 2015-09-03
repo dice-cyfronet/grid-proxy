@@ -43,6 +43,11 @@ module GP
       raise GP::ProxyValidationError.new("Private proxy key and cert mismatch") unless proxycert.check_private_key(proxykey)
 
       raise GP::ProxyValidationError.new("User cert was revoked") if crl_payload != nil and revoked? crl_payload
+
+      if now < usercert.not_before || now > usercert.not_after
+        raise GP::ProxyValidationError.
+              new('Proxy signed by outdated certificate')
+      end
     end
 
     def valid?(ca_cert_payload, crl_payload = nil)
