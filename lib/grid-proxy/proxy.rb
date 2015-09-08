@@ -54,7 +54,7 @@ module GP
       begin
         verify! ca_cert_payload, crl_payload
         true
-      rescue GP::ProxyValidationError => e
+      rescue GP::ProxyValidationError
         false
       end
     end

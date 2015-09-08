@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["mkasztelnik@gmail.com"]
   spec.description   = %q{Grid proxy utils}
   spec.summary       = %q{Grid proxy utils}
-  spec.homepage      = ""
+  spec.homepage      = "https://gitlab.dev.cyfronet.pl/commons/grid-proxy"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files`.split($/)
